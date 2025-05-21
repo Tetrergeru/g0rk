@@ -35,11 +35,15 @@ func main() {
 
 		responce := ""
 		if isThisTrue.MatchString(update.Message.Text) {
-			log.Printf("isThisTrue: [%s] %s", update.Message.From.UserName, update.Message.Text)
+			log.Printf("isThisTrue: [%s] %s\n", update.Message.From.UserName, update.Message.Text)
 
-			responce = calculateTruthness()
+			if update.Message.ReplyToMessage != nil && update.Message.ReplyToMessage.From.UserName == "g0rk_bot" {
+				responce = "this is absolutely true"
+			} else {
+				responce = calculateTruthness()
+			}
 		} else if isSummarize.MatchString(update.Message.Text) {
-			log.Printf("isSummarize: [%s] %s", update.Message.From.UserName, update.Message.Text)
+			log.Printf("isSummarize: [%s] %s\n", update.Message.From.UserName, update.Message.Text)
 
 			responce = generateSummary()
 		}
