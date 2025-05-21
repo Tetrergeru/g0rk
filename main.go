@@ -10,6 +10,7 @@ import (
 )
 
 var isThisTrue *regexp.Regexp = regexp.MustCompile(`(?i)gork\s+is\s+this\s+true`)
+var isSummarize *regexp.Regexp = regexp.MustCompile(`(?i)(перескажи|summarize)`)
 
 func main() {
 	token := os.Getenv("GORK_TELEGRAM_TOKEN")
@@ -28,14 +29,24 @@ func main() {
 	updates := bot.GetUpdatesChan(u)
 
 	for update := range updates {
-		if update.Message != nil && isThisTrue.MatchString(update.Message.Text) {
-			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, calculateTruthness())
-			msg.ReplyToMessageID = update.Message.MessageID
-
-			bot.Send(msg)
+		if update.Message == nil {
+			continue
 		}
+
+		responce := ""
+		if isThisTrue.MatchString(update.Message.Text) {
+			log.Printf("isThisTrue: [%s] %s", update.Message.From.UserName, update.Message.Text)
+
+			responce = calculateTruthness()
+		} else if isSummarize.MatchString(update.Message.Text) {
+			log.Printf("isSummarize: [%s] %s", update.Message.From.UserName, update.Message.Text)
+
+			responce = generateSummary()
+		}
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, responce)
+		msg.ReplyToMessageID = update.Message.MessageID
+
+		bot.Send(msg)
 	}
 
 }
@@ -46,4 +57,19 @@ func calculateTruthness() string {
 	}
 
 	return "this is absolutely true"
+}
+
+func generateSummary() string {
+	switch rand.Intn(5) {
+	case 0:
+		return "Ну там это... Ведро.... Колодец.... И вода...."
+	case 1:
+		return "Все проблемы бекоз оф вок"
+	case 2:
+		return "Экономике России осталось 3 дня"
+	case 3:
+		return "В этом, как в зеркале отразилась вся суть России за последние 20 лет"
+	default:
+		return "Это критика капитализма"
+	}
 }
